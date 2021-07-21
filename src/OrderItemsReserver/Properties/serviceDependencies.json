@@ -1,5 +1,16 @@
 {
   "dependencies": {
+    "secrets1": {
+      "type": "secrets"
+    },
+    "storage2": {
+      "type": "storage",
+      "connectionId": "queue-connection-string"
+    },
+    "storage3": {
+      "type": "storage",
+      "connectionId": "eshop-queue"
+    },
     "storage1": {
       "type": "storage",
       "connectionId": "AzureWebJobsStorage"

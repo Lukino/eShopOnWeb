@@ -9,5 +9,9 @@
         public string UploadDeliveryDetailsUrl { get; set; }
 
         public bool UploadDeliveryDetailsIsEnabled { get; set; }
+
+        public string ItemsReserverQueueConnectionString { get; set; }
+
+        public bool ItemsReserverQueueIsEnabled { get; set; }
     }
 }

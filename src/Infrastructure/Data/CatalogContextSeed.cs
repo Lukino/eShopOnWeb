@@ -15,7 +15,10 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
             int retryForAvailability = retry.Value;
             try
             {
-                catalogContext.Database.Migrate();
+                if (Environment.GetEnvironmentVariable("UseSqlServer") == "True")
+                {
+                    catalogContext.Database.Migrate();
+                }
 
                 if (!await catalogContext.CatalogBrands.AnyAsync())
                 {

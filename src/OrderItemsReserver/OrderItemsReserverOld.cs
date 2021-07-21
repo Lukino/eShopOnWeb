@@ -1,49 +1,43 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace OrderItemsReserver
 {
-    public static class OrderItemsReserver
+    public static class OrderItemsReserverOld
     {
         private static readonly string _orderDetailsBlobContainerName = "order-details";
 
-        [FunctionName("OrderItemsReserver")]
-        public async static void Run([ServiceBusTrigger("orderitemsreserver", Connection = "eshop-queue")] string myQueueItem, ILogger log, ExecutionContext context)
+        // [FunctionName("OrderItemsReserver")]
+        public static async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+            ILogger log, ExecutionContext context)
         {
-            log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+            log.LogInformation($"C# Http trigger function executed at: {DateTime.Now}");
 
-            var orderDetails = JsonConvert.DeserializeObject<OrderDetails>(myQueueItem);
+            using var streamReader = new StreamReader(req.Body);
+            var orderDetails = JsonConvert.DeserializeObject<OrderDetails>(streamReader.ReadToEnd());
 
-            var blob = (await GetCloudBlobContainer(log, context, _orderDetailsBlobContainerName)).GetBlockBlobReference($"{orderDetails.ItemId}.json");
+            var blob = (await GetCloudBlobContainer(log, context, _orderDetailsBlobContainerName)).GetBlockBlobReference($"{orderDetails.Id}.json");
             blob.Properties.ContentType = "application/json";
 
-            for (var i = 0; i < 3; i++)
-            {
-                try
-                {
-                    using var ms = new MemoryStream();
-                    await blob.UploadFromStreamAsync(LoadStreamWithJson(ms, JsonConvert.SerializeObject(orderDetails)));
-                }
-                catch
-                {
-                    if (i == 2)
-                    {
-                        throw;
-                    }
-                }
-            }
+            using var ms = new MemoryStream();
+            await blob.UploadFromStreamAsync(LoadStreamWithJson(ms, JsonConvert.SerializeObject(orderDetails)));
 
             log.LogInformation($"Blob {blob.Name} is uploaded to container {_orderDetailsBlobContainerName}");
 
             await blob.SetPropertiesAsync();
+
+            return new OkObjectResult($"Order ('{orderDetails.Id}') details uploaded successfully!");
         }
 
         private async static Task<CloudBlobContainer> GetCloudBlobContainer(ILogger logger, ExecutionContext executionContext, string containerName)
@@ -78,7 +72,7 @@ namespace OrderItemsReserver
 
         private class OrderDetails
         {
-            public string ItemId { get; set; }
+            public string Id { get; set; }
 
             public decimal Quantity { get; set; }
         }
