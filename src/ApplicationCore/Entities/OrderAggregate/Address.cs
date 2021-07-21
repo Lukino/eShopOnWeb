@@ -22,5 +22,10 @@
             Country = country;
             ZipCode = zipcode;
         }
+
+        public override string ToString()
+        {
+            return $"{Country}, {State}, {City}, {Street}, {ZipCode}";
+        }
     }
 }

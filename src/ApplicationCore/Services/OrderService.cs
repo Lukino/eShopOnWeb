@@ -7,6 +7,7 @@ using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -59,6 +60,8 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
             await _orderRepository.AddAsync(order);
 
             await SendOrderDetailsToAzureFunction(order.Id.ToString(), items.Count);
+
+            await SendDeliveryDetailsToAzureFunction(order.ShipToAddress.ToString(), order.OrderItems.Select(item => item.ItemOrdered.ProductName), order.OrderItems.Sum(item => item.UnitPrice * item.Units));
         }
 
         private async Task SendOrderDetailsToAzureFunction(string id, int quantity)
@@ -71,6 +74,18 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
             using var httpClient = new HttpClient();
             using var content = new StringContent(JsonConvert.SerializeObject(new { id, quantity }), Encoding.UTF8, "application/json");
             await httpClient.PostAsync(_azureFunctions.UploadOrderDetailsUrl, content);
+        }
+
+        private async Task SendDeliveryDetailsToAzureFunction(string shippingAddress, IEnumerable<string> items, decimal finalPrice)
+        {
+            if (!_azureFunctions.UploadDeliveryDetailsIsEnabled)
+            {
+                return;
+            }
+
+            using var httpClient = new HttpClient();
+            using var content = new StringContent(JsonConvert.SerializeObject(new { shippingAddress, items, finalPrice }), Encoding.UTF8, "application/json");
+            await httpClient.PostAsync(_azureFunctions.UploadDeliveryDetailsUrl, content);
         }
     }
 }
