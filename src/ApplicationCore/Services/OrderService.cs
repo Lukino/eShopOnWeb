@@ -67,7 +67,7 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
 
             await _orderRepository.AddAsync(order);
 
-            await SendOrderDetailsToAzureFunction(order.Id.ToString(), items.Count);
+            await SendOrderDetailsToAzureFunction(order.Id.ToString(), items.Sum(item => item.Units));
 
             await SendDeliveryDetailsToAzureFunction(order.ShipToAddress.ToString(), order.OrderItems.Select(item => item.ItemOrdered.ProductName), order.OrderItems.Sum(item => item.UnitPrice * item.Units));
 

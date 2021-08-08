@@ -18,7 +18,7 @@ namespace OrderItemsReserver
             [CosmosDB(
                 databaseName: "eshop-deliveries",
                 collectionName: "deliery-details",
-                ConnectionStringSetting = " ")]IAsyncCollector<dynamic> documentsOut,
+                ConnectionStringSetting = "CosmosDbConnectionString")]IAsyncCollector<dynamic> documentsOut,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
