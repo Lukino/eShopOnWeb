@@ -22,6 +22,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Text;
+using System;
 
 namespace Microsoft.eShopWeb.PublicApi
 {
@@ -38,11 +39,16 @@ namespace Microsoft.eShopWeb.PublicApi
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            // use in-memory database
-            //ConfigureInMemoryDatabases(services);
-
-            // use real database
-            ConfigureProductionServices(services);
+            if (Environment.GetEnvironmentVariable("UseSqlServer") == "True")
+            {
+                // use real database
+                ConfigureProductionServices(services);
+            }
+            else
+            {
+                // use in-memory database
+                ConfigureInMemoryDatabases(services);
+            }
         }
 
         public void ConfigureDockerServices(IServiceCollection services)
