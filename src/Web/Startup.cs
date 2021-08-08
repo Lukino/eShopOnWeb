@@ -171,6 +171,7 @@ namespace Microsoft.eShopWeb.Web
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             _services = services; // used to debug registered services
+            services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
         }
 
 

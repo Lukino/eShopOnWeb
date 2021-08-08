@@ -11,13 +11,13 @@
       "type": "storage",
       "connectionId": "eshop-queue"
     },
-    "storage1": {
-      "type": "storage",
-      "connectionId": "AzureWebJobsStorage"
-    },
     "appInsights1": {
       "type": "appInsights",
       "connectionId": "APPINSIGHTS_CONNECTIONSTRING"
+    },
+    "storage1": {
+      "type": "storage",
+      "connectionId": "AzureWebJobsStorage"
     }
   }
 }
